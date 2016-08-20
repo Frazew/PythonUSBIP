@@ -26,7 +26,7 @@ class WiimoteSearch(Thread):
 		max_wiimotes = 4
 		while not self.should_stop:
 			if (self.usb_container.devices_count == 0):
-				print '[' + bcolors.OKBLUE + 'WiimoteSearch' + bcolors.ENDC + '] Looking for wiimotes'
+				print '[' + bcolors.OKBLUE + 'WiimoteSearch' + bcolors.ENDC + '] Looking for wiimotes (Press 1+2)'
 				start = time.time()
 				while (self.usb_container.devices_count < max_wiimotes and time.time() - start <= 60 and not self.should_stop):
 					try:
