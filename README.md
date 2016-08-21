@@ -1,4 +1,6 @@
 # PythonUSBIP
+Emulating usb devices with python using the [USB/IP](http://usbip.sourceforge.net/) protocol.
+
 This work is heavily based on [this repository](https://github.com/lcgamboa/USBIP-Virtual-USB-Device).
 However, there a many differences, mainly because this new version supports any number of devices.
 It is still missing a proper detach protocol.
