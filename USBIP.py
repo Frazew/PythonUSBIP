@@ -1,6 +1,7 @@
 import SocketServer
 import struct
 import types
+from bitstring import Bits
 
 # Hey StackOverflow !
 class bcolors:
@@ -208,9 +209,17 @@ class USBIPRETSubmit(BaseStucture):
         packed_data += self.data
         return packed_data
 
+class USBIPCMDUnlink(BaseStucture):
+    _fields_ = [
+        ('seqnum', 'I'),
+        ('devid', 'I'),
+        ('direction', 'I'),
+        ('ep', 'I'),
+        ('seqnum2', 'I'),
+    ]
+
 class USBIPCMDSubmit(BaseStucture):
     _fields_ = [
-        ('command', 'I'),
         ('seqnum', 'I'),
         ('devid', 'I'),
         ('direction', 'I'),
@@ -529,28 +538,40 @@ class USBIPConnection(SocketServer.BaseRequestHandler):
                 else:
                     #print '----------------' 
                     #print 'handles requests'
-                    cmd = USBIPCMDSubmit()
-                    data = self.request.recv(cmd.size())
-                    cmd.unpack(data)
-                    #print "usbip cmd {}".format(cmd.command,'x')
-                    #print "usbip seqnum {}".format(cmd.seqnum,'x')
-                    #print "usbip devid {}".format(cmd.devid,'x')
-                    #print "usbip direction {}".format(cmd.direction,'x')
-                    #print "usbip ep {}".format(cmd.ep,'x')
-                    #print "usbip flags {}".format(cmd.transfer_flags,'x')
-                    #print "usbip number of packets {}".format(cmd.number_of_packets,'x')
-                    #print "usbip interval {}".format(cmd.interval,'x')
-                    #print "usbip setup {}".format(cmd.setup,'x')
-                    #print "usbip buffer lenght  {}".format(cmd.transfer_buffer_length,'x')
-                    usb_req = USBRequest(seqnum=cmd.seqnum,
-                                         devid=cmd.devid,
-                                         direction=cmd.direction,
-                                         ep=cmd.ep,
-                                         flags=cmd.transfer_flags,
-                                         numberOfPackets=cmd.number_of_packets,
-                                         interval=cmd.interval,
-                                         setup=cmd.setup,
-                                         data=data)
-                    self.server.usbcontainer.usb_devices[self.attachedBusID].connection = self.request
-                    self.server.usbcontainer.usb_devices[self.attachedBusID].handle_usb_request(usb_req)
+                    command = self.request.recv(4)
+                    if (command == 0x00000003):
+                        cmd = USBIPCMDUnlink()
+                        data = self.request.recv(cmd.size())
+                        cmd.unpack(data)
+                        print '[' + bcolors.OKBLUE + 'USBIP' + bcolors.ENDC + '] Detaching device with seqnum', cmd.seqnum
+                        # We probably don't even need to handle that, the windows client doesn't even send this packet
+                    else :
+                        cmd = USBIPCMDSubmit()
+                        data = self.request.recv(cmd.size())
+                        cmd.unpack(data)
+                        #print "usbip cmd {}".format(cmd.command,'x')
+                        #print "usbip seqnum {}".format(cmd.seqnum,'x')
+                        #print "usbip devid {}".format(cmd.devid,'x')
+                        #print "usbip direction {}".format(cmd.direction,'x')
+                        #print "usbip ep {}".format(cmd.ep,'x')
+                        #print "usbip flags {}".format(cmd.transfer_flags,'x')
+                        #print "usbip number of packets {}".format(cmd.number_of_packets,'x')
+                        #print "usbip interval {}".format(cmd.interval,'x')
+                        #print "usbip setup {}".format(cmd.setup,'x')
+                        #print "usbip buffer lenght  {}".format(cmd.transfer_buffer_length,'x')
+                        usb_req = USBRequest(seqnum=cmd.seqnum,
+                                             devid=cmd.devid,
+                                             direction=cmd.direction,
+                                             ep=cmd.ep,
+                                             flags=cmd.transfer_flags,
+                                             numberOfPackets=cmd.number_of_packets,
+                                             interval=cmd.interval,
+                                             setup=cmd.setup,
+                                             data=data)
+                        self.server.usbcontainer.usb_devices[self.attachedBusID].connection = self.request
+                        try:
+                            self.server.usbcontainer.usb_devices[self.attachedBusID].handle_usb_request(usb_req)
+                        except:
+                            print '[' + bcolors.FAIL + 'USBIP' + bcolors.ENDC + '] Connection with client ' + str(self.client_address) + ' ended'
+                            break
         self.request.close()

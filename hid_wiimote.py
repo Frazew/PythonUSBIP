@@ -70,6 +70,11 @@ class WiimoteContainer(USBContainer):
             if (dev.wiimote_number > wiimoteNumber):
                 dev.updateWiimoteNumber(dev.wiimote_number - 1)
 
+    def detach_all(self):
+        for busid, dev in self.usb_devices.iteritems():
+            dev.wiimote.close()
+        USBContainer.detach_all(self)
+
 class WiimoteHID(USBDevice):
     vendorID = 0x0079
     productID = 0x0006
