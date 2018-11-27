@@ -16,7 +16,7 @@ Using USBIP on Windows can be a huge pain. I have done a lot of research before 
 * This is not directly related to this post, but if you're having issues attaching a device from Windows to a linux host, this is because usbip has been merged into the kernel since 3.14. However, no need to downgrade, there is [a fix](https://sourceforge.net/p/usbip/discussion/418507/thread/7ff86875/?limit=25&page=5#cd87) !
 
 ## Wiimote example
-This repository contains a fully fonctionnal USBIP wiimote example. It uses cwiid to communicate with the wiimotes.
+This repository contains a fully functional USBIP wiimote example. It uses cwiid to communicate with the wiimotes.
 Everything is implemented, including using multiple wiimotes and using a nunchuk.
 All wiimotes are represented as a Generic USB Joystick with USBIP, they are therefore accessible without any specific driver.
 In order to use it, launch `python wiimotes.py` and follow the instructions.
